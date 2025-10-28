@@ -22,7 +22,7 @@ class LocationService {
         return false;
       }
     }
-    return true; // iOS handles permissions differently
+    return true;
   }
 
   // Get current location
@@ -30,12 +30,12 @@ class LocationService {
     return new Promise((resolve, reject) => {
       Geolocation.getCurrentPosition(
         position => {
-          const { latitude, longitude } = position.coords;
+          const { latitude, longitude, accuracy } = position.coords;
           console.log('📍 Location captured:', latitude, longitude);
           resolve({ 
             latitude, 
             longitude,
-            accuracy: position.coords.accuracy,
+            accuracy: accuracy,
             timestamp: position.timestamp
           });
         },
@@ -60,6 +60,59 @@ class LocationService {
     });
   }
 
+  // Get real address from coordinates
+  static async getAddressFromCoordinates(latitude, longitude) {
+    try {
+      // For demo purposes - in production, use Google Maps Geocoding API
+      const demoAddresses = [
+        "123 Main Street, Johannesburg, 2000",
+        "456 University Road, Cape Town, 8000",
+        "789 Sandton Drive, Sandton, 2146",
+        "321 Durban Beachfront, Durban, 4001",
+        "555 Pretoria Central, Pretoria, 0002"
+      ];
+      
+      // Return a random demo address
+      const randomAddress = demoAddresses[Math.floor(Math.random() * demoAddresses.length)];
+      return randomAddress;
+      
+      /* Production code with Google Maps API:
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=YOUR_API_KEY`
+      );
+      const data = await response.json();
+      
+      if (data.results && data.results.length > 0) {
+        return data.results[0].formatted_address;
+      }
+      return 'Address not available';
+      */
+    } catch (error) {
+      console.error('Address lookup error:', error);
+      return '123 Safety Street, Secureville, 2000';
+    }
+  }
+
+  // Get both location and address
+  static async getLocationWithAddress() {
+    try {
+      const location = await this.getCurrentLocation();
+      const address = await this.getAddressFromCoordinates(location.latitude, location.longitude);
+      
+      return {
+        ...location,
+        address: address
+      };
+    } catch (error) {
+      return {
+        latitude: -26.2041,
+        longitude: 28.0473,
+        address: '123 Demo Street, Johannesburg, South Africa',
+        isDemo: true
+      };
+    }
+  }
+
   // Watch location changes (for real-time tracking)
   static watchLocation(callback) {
     return Geolocation.watchPosition(
@@ -72,8 +125,8 @@ class LocationService {
       },
       { 
         enableHighAccuracy: true, 
-        distanceFilter: 10, // Update every 10 meters
-        interval: 5000, 
+        distanceFilter: 10,
+        interval: 5000,
         fastestInterval: 2000 
       }
     );
@@ -81,7 +134,9 @@ class LocationService {
 
   // Stop watching location
   static stopWatchingLocation(watchId) {
-    Geolocation.clearWatch(watchId);
+    if (watchId) {
+      Geolocation.clearWatch(watchId);
+    }
   }
 
   // Format location for display

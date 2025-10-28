@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import LoginScreen from './src/screens/LoginScreen';
 import DisguisedFlashlight from './src/screens/DisguisedFlashlight';
 import RealDashboard from './src/screens/RealDashboard';
 import ContactsScreen from './src/screens/ContactsScreen';
@@ -11,6 +12,7 @@ const App = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="DisguisedFlashlight" component={DisguisedFlashlight} />
         <Stack.Screen name="RealDashboard" component={RealDashboard} />
         <Stack.Screen name="Contacts" component={ContactsScreen} />
